@@ -1,2 +1,2 @@
-# tcaqs
-Tibia Character Automated Quotation System
+# TCAQS - Tibia Character Automated Quotation System
+
