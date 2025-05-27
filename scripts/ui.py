@@ -6,6 +6,7 @@
 import os
 import sys
 import pickle
+import sqlite3
 import pandas as pd
 import numpy as np
 import datetime
@@ -13,8 +14,8 @@ import datetime
 # Add parent directory to path to enable imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Model path
-MODEL_PATH = '../models/xgboost_character_bid_model.pkl'
+# Model path - use absolute path to avoid path issues
+MODEL_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'models', 'xgboost_character_bid_model.pkl')
 
 # Load the model and preprocessor
 def load_model(model_path=MODEL_PATH):
@@ -32,17 +33,56 @@ def load_model(model_path=MODEL_PATH):
 # Define vocations for dropdown
 VOCATIONS = ['knight', 'paladin', 'sorcerer', 'druid']
 
-# Define server suffixes for dropdown
-SERVER_SUFFIXES = ['Optional-PvP', 'Open-PvP', 'Hardcore-PvP']
+# Function to get actual server names from the database
+def get_actual_servers():
+    try:
+        conn = sqlite3.connect(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'characters.db'))
+        cursor = conn.cursor()
+        cursor.execute('SELECT DISTINCT server FROM characters ORDER BY server')
+        servers = [row[0] for row in cursor.fetchall()]
+        conn.close()
+        return servers
+    except Exception as e:
+        print(f"Error retrieving server names: {e}")
+        # Fallback to a predefined list if there's an error
+        return [
+            'Adra', 'Alumbra', 'Antica', 'Ardera', 'Astera', 'Axera', 'Bastia',
+            'Batabra', 'Belobra', 'Bombra', 'Bona', 'Cadebra', 'Calmera', 'Castela',
+            'Celebra', 'Celesta', 'Collabra', 'Damora', 'Descubra', 'Dibra'
+        ]
+
+# Get actual server names from the database
+ACTUAL_SERVERS = get_actual_servers()
+
+# These are the actual 3-letter suffixes the model expects (extracted from error message)
+MODEL_SERVER_SUFFIXES = [
+    'ira', 'sta', 'cia', 'una', 'ica', 'ona', 'ura', 'nia', 'ria', 'ela', 
+    'oca', 'gia', 'osa', 'era', 'nza', 'rna', 'ora', 'dra', 'rsa', 'mia', 
+    'ena', 'lsa', 'tia', 'ima'
+]
 
 # Function to make predictions
 def predict_character_bid(character_data, model, preprocessor):
     """Make bid prediction for character data."""
     # Add required columns if missing
     # Format vocation into one-hot encoded columns
-    for voc in VOCATIONS:
+    
+    # 1. Add all vocation columns
+    # Make sure vocation_none is included too
+    all_vocations = VOCATIONS + ['none']
+    for voc in all_vocations:
         if f'vocation_{voc}' not in character_data:
             character_data[f'vocation_{voc}'] = 0
+    
+    # 2. Add all possible server suffix columns that the model might be expecting
+    server_suffixes = [
+        'ira', 'sta', 'cia', 'una', 'ica', 'ona', 'ura', 'nia', 'ria', 'ela', 
+        'oca', 'gia', 'osa', 'era', 'nza', 'rna', 'ora', 'dra', 'rsa', 'mia', 
+        'ena', 'lsa', 'tia', 'ima'
+    ]
+    for suffix in server_suffixes:
+        if f'server_suffix_{suffix}' not in character_data:
+            character_data[f'server_suffix_{suffix}'] = 0
     
     # Format as DataFrame
     if not isinstance(character_data, pd.DataFrame):
@@ -61,6 +101,29 @@ def predict_character_bid(character_data, model, preprocessor):
     now = datetime.datetime.now()
     character_data['auction_hour'] = now.hour
     character_data['auction_day_of_week'] = now.weekday()
+    
+    # Check what columns the preprocessor is expecting
+    # We can extract this information indirectly
+    try:
+        # Try to get feature names from the one-hot encoder part if available
+        if hasattr(preprocessor, 'named_transformers_') and 'cat' in preprocessor.named_transformers_:
+            encoder = preprocessor.named_transformers_['cat']
+            if hasattr(encoder, 'get_feature_names_out'):
+                # Get the categorical features the model expects
+                cat_features = encoder.get_feature_names_out().tolist()
+                for feature in cat_features:
+                    if feature not in character_data.columns:
+                        # Extract the name after the underscore (feature category)
+                        if '_' in feature:
+                            feature_parts = feature.split('_', 1)
+                            feature_cat = feature_parts[0]
+                            feature_val = feature_parts[1]
+                            if feature_cat in character_data.columns:
+                                # We have the category but not this specific encoding
+                                character_data[feature] = 0
+    except Exception as e:
+        # If anything goes wrong, just continue with what we have
+        print(f"Warning: Could not extract feature names from preprocessor: {e}")
         
     # Preprocess the data
     X_new = preprocessor.transform(character_data)
@@ -93,10 +156,16 @@ def predict_from_interface(level, vocation, server, axe, club, sword, distance, 
     hirelings_outfits = 0
     imbuements = 0
     
+    # We now use actual server names from the database
+    selected_server = server  # This is now a real server name from ACTUAL_SERVERS
+    
+    # Extract the suffix (last 3 characters) from the server name
+    server_suffix = selected_server[-3:].lower() if selected_server else "ica"
+    
     # Prepare data in the format expected by the model
     character_data = {
         'level': level,
-        'server': f"SomeServer {server}",  # Server name doesn't matter, just the suffix
+        'server': selected_server,  # Use the actual server name from database
         'is_name_contains_special_character': special_char,
         'axe_fighting': axe,
         'club_fighting': club,
@@ -109,7 +178,7 @@ def predict_from_interface(level, vocation, server, axe, club, sword, distance, 
         'outfits': outfits,
         'gold': gold,
         'achievement_points': achievements,
-        'is_transfer_available': False,  # Default value
+        'is_transfer_available': transfer_available,  # Now uses the parameter
         'available_charm_points': charm_points_available,
         'spent_charm_points': charm_points_spent,
         'charm_expansion': charm_expansion,
@@ -122,17 +191,34 @@ def predict_from_interface(level, vocation, server, axe, club, sword, distance, 
         'hirelings_outfits': hirelings_outfits,
         'imbuements': imbuements,
         'charms': charms,
-        'server_suffix': server
+        'server_suffix': server_suffix  # Use the actual 3-letter suffix
     }
     
-    # Add vocation one-hot encoding
-    for voc in VOCATIONS:
+    # Add vocation one-hot encoding with more comprehensive handling
+    all_vocations = VOCATIONS + ['none']
+    for voc in all_vocations:
         character_data[f'vocation_{voc}'] = 1 if vocation == voc else 0
     
-    # Add server suffix one-hot encoding
-    for suffix in SERVER_SUFFIXES:
-        if suffix != 'Optional-PvP':  # This is the reference category (drop_first=True)
-            character_data[f'server_suffix_{suffix}'] = 1 if server == suffix else 0
+    # Extract a 3-character suffix from the server instead of using predefined suffixes
+    # This better matches what was done during training
+    if 'server' in character_data and isinstance(character_data['server'], str):
+        server_name = character_data['server']
+        # Extract the last 3 characters from the server name
+        if len(server_name) >= 3:
+            actual_suffix = server_name[-3:].lower()
+            character_data[f'server_suffix_{actual_suffix}'] = 1
+        
+    # Add specific server suffix encodings from the error message
+    server_suffixes = [
+        'ira', 'sta', 'cia', 'una', 'ica', 'ona', 'ura', 'nia', 'ria', 'ela', 
+        'oca', 'gia', 'osa', 'era', 'nza', 'rna', 'ora', 'dra', 'rsa', 'mia', 
+        'ena', 'lsa', 'tia', 'ima'
+    ]
+    
+    # Initialize all to 0
+    for suffix in server_suffixes:
+        if f'server_suffix_{suffix}' not in character_data:
+            character_data[f'server_suffix_{suffix}'] = 0
 
     # Make prediction
     predicted_bid = predict_character_bid(character_data, model, preprocessor)
@@ -149,7 +235,7 @@ def predict_from_interface(level, vocation, server, axe, club, sword, distance, 
     ### Key factors affecting the price:
     - Character level: {level}
     - Vocation: {vocation.title()}
-    - Server type: {server}
+    - Server: {server}
     - Magic level: {magic}
     - Combat skills: Avg. {(axe + club + sword + distance) / 4:.1f}
     
@@ -170,7 +256,7 @@ def launch_app():
                 # Main character info
                 gr.Slider(minimum=8, maximum=2000, value=100, step=1, label="Character Level"),
                 gr.Dropdown(choices=VOCATIONS, value="knight", label="Vocation"),
-                gr.Dropdown(choices=SERVER_SUFFIXES, value="Optional-PvP", label="Server Type"),
+                gr.Dropdown(choices=ACTUAL_SERVERS, value="Antica", label="Server"),
                 
                 # Combat skills - simplified subset
                 gr.Slider(minimum=10, maximum=130, value=80, step=1, label="Axe Fighting"),
