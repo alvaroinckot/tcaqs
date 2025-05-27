@@ -23,7 +23,7 @@ To launch the character price prediction web interface:
 
 ```bash
 cd scripts
-./character_predictor.py
+./ui.py
 ```
 
 This will start a Gradio web server on port 7860. You can access it at:
