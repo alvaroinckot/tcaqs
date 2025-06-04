@@ -176,23 +176,6 @@ def extract_info(info):
     except Exception as e:
         print(f"Warning: Could not extract store outfits: {e}")
 
-    # Extract Blessings information
-    blessings_list = []
-    try:
-        blessing_rows = soup.select('#Blessings .TableContent tr')[1:]  # Skip header
-        for row in blessing_rows:
-            cells = row.select('td')
-            if len(cells) >= 2:
-                amount = cells[0].get_text().strip()
-                blessing_name = cells[1].get_text().strip()
-                if amount and blessing_name:
-                    blessings_list.append({
-                        'amount': amount,
-                        'name': blessing_name
-                    })
-    except Exception as e:
-        print(f"Warning: Could not extract blessings: {e}")
-
     return {
         'status': status,
         'name': name,
@@ -236,22 +219,8 @@ def extract_info(info):
         'store_mounts_list': store_mounts_list,
         'outfits_list': outfits_list,
         'store_outfits_list': store_outfits_list,
-        'blessings_list': blessings_list
     }
 
-
-# #ajax-target-type-3 > div:nth-child(1) > small:nth-child(1) > div:nth-child(2) > b:nth-child(1)
-
-# # open home/alvaro/Downloads/scrap/scrap14/scrap/512499.html and process
-# f = open("/home/alvaro/Downloads/scrap/scrap14/scrap/512499.html", "r", encoding="utf-8")
-# # Read the HTML content
-# html_content = f.read()
-# # Close the file
-# f.close()
-# # Extract information from the HTML content
-# data = extract_info(html_content)
-# # Print the extracted data
-# print(data)
 
 # Connect to SQLite database (will create if doesn't exist)
 conn = sqlite3.connect('characters_v2.db')
@@ -301,8 +270,7 @@ CREATE TABLE IF NOT EXISTS characters (
     mounts_list TEXT,
     store_mounts_list TEXT,
     outfits_list TEXT,
-    store_outfits_list TEXT,
-    blessings_list TEXT
+    store_outfits_list TEXT
 )
 ''')
 
@@ -363,14 +331,14 @@ def save_batch_to_db(data_batch, db_path='characters_v2.db'):
                 json.dumps(data['imbuements_list']), json.dumps(data['charms_list']), 
                 json.dumps(data['quest_lines']), json.dumps(data['mounts_list']), 
                 json.dumps(data['store_mounts_list']), json.dumps(data['outfits_list']), 
-                json.dumps(data['store_outfits_list']), json.dumps(data['blessings_list'])
+                json.dumps(data['store_outfits_list'])
             ))
     
     # Begin transaction for bulk insert
     conn.execute('BEGIN TRANSACTION')
     cursor.executemany('''
     INSERT OR REPLACE INTO characters VALUES (
-        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+        ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
     )
     ''', values)
     conn.commit()
