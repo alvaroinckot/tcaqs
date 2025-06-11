@@ -479,9 +479,9 @@ def launch_app():
         import gradio as gr
         
         # Create a comprehensive interface with all parameters organized in tabs
-        with gr.Blocks(title="Tibia Character Auction Price Predictor") as iface:
-            gr.Markdown("# 🎮 Tibia Character Auction Price Predictor")
-            gr.Markdown("Enter your character's attributes to predict the auction price using our XGBoost machine learning model.")
+        with gr.Blocks(title="Tibia Character Automated Quotation System") as iface:
+            gr.Markdown("# 🎮 Tibia Character Automated Quotation System")
+            gr.Markdown("Enter your character's attributes to predict the auction price using our XGBoost machine learning model.\n\nSource code: [alvaroinckot/tcaqs](https://github.com/alvaroinckot/tcaqs)")
             
             with gr.Tab("🏆 Basic Info"):
                 with gr.Row():
