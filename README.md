@@ -1,3 +1,9 @@
+---
+title: TCAQS_-_Tibia_Character_Price_Predictor
+app_file: app.py
+sdk: gradio
+sdk_version: 5.31.0
+---
 # 🎮 TCAQS - Tibia Character Automated Quotation System
 
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://python.org)
