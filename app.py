@@ -519,7 +519,8 @@ def create_gradio_interface():
     # Create a comprehensive interface with all parameters organized in tabs
     with gr.Blocks(title="Tibia Character Automated Quotation System") as iface:
         gr.Markdown("# 🎮 Tibia Character Automated Quotation System")
-        gr.Markdown("Enter your character's attributes to predict the auction price using our XGBoost machine learning model.\n\nSource code: [alvaroinckot/tcaqs](https://github.com/alvaroinckot/tcaqs)")
+        gr.Markdown("Enter your character's attributes to predict the auction price using our XGBoost machine learning model. Source code: [alvaroinckot/tcaqs](https://github.com/alvaroinckot/tcaqs)")
+        gr.Markdown("**Disclaimer**: This model was trained on data from 2022. Actual values may vary significantly from predictions, and inconsistencies will happen as the market evolves.")
         
         # Tab 1: Basic Info
         with gr.Tab("🏆 Basic Info"):
