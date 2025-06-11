@@ -152,20 +152,6 @@ gradio deploy  # Deploy to Gradio Spaces
 - **Outlier Analysis**: Robust performance on edge cases
 - **Feature Importance**: Top predictors identified and analyzed
 
-## 🎨 Key Features Showcase
-
-### **🔥 Most Important Predictors**
-1. **Character Level** (Primary driver)
-2. **Combat Skills** (Vocation-specific)
-3. **Rare Mounts & Outfits** (Collectible value)
-4. **Achievement Points** (Character progression)
-5. **Server Popularity** (Market demand)
-
-### **📊 Advanced Analytics**
-- **Price Distribution Analysis**: Understanding market segments
-- **Feature Correlation**: Identifying value drivers
-- **Temporal Patterns**: Auction timing effects
-- **Server Comparison**: Cross-server market analysis
 
 ## 🚀 Deployment
 
