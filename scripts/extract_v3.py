@@ -10,7 +10,7 @@ import time
 import lxml
 import json
 
-def check_minimum_bid_auction(auction_id, html_dir="/home/alvaro/Downloads/scrap/scrap14/scrap"):
+def check_minimum_bid_auction(auction_id, html_dir="$BASE_PATH/Downloads/scrap/scrap14/scrap"):
     """
     Check if an auction has 'Minimum Bid' text in the specified CSS selector.
     Returns True if it's a minimum bid auction (should be marked as failed).
@@ -40,7 +40,7 @@ def check_minimum_bid_auction(auction_id, html_dir="/home/alvaro/Downloads/scrap
         print(f"Error processing auction {auction_id}: {e}")
         return False
 
-def process_auction_batch(auction_ids_batch, html_dir="/home/alvaro/Downloads/scrap/scrap14/scrap"):
+def process_auction_batch(auction_ids_batch, html_dir="$BASE_PATH/Downloads/scrap/scrap14/scrap"):
     """
     Process a batch of auction IDs and return a list of IDs that should be marked as failed.
     """
@@ -85,7 +85,7 @@ def process_finished_auctions_parallel():
     # Configuration
     BATCH_SIZE = 1000  # Process this many auctions before updating DB
     MAX_WORKERS = min(os.cpu_count(), multiprocessing.cpu_count())
-    HTML_DIR = "/home/alvaro/Downloads/scrap/scrap14/scrap"
+    HTML_DIR = "$BASE_PATH/Downloads/scrap/scrap14/scrap"
     DB_PATH = 'characters_v3.db'
     
     print(f"Using {MAX_WORKERS} worker processes")

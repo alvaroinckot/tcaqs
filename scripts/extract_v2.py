@@ -274,7 +274,7 @@ CREATE TABLE IF NOT EXISTS characters (
 )
 ''')
 
-html_dir = Path("/home/alvaro/Downloads/scrap/scrap14/scrap")
+html_dir = Path("$BASE_PATH/Downloads/scrap/scrap14/scrap")
 
 html_files = list(html_dir.glob("*.html"))
 print(f"Found {len(html_files)} HTML files to process")
