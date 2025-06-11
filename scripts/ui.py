@@ -16,7 +16,7 @@ import json
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Model path - use absolute path to avoid path issues
-MODEL_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'models', 'xgboost_character_bid_model_v2.pkl')
+MODEL_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'models', 'xgboost_character_bid_model_v3.pkl')
 
 # Load server information from servers.json
 def load_server_info():
