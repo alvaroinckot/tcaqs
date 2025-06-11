@@ -173,7 +173,7 @@ cursor.execute('CREATE INDEX IF NOT EXISTS idx_level ON characters(level)')
 cursor.execute('CREATE INDEX IF NOT EXISTS idx_server ON characters(server)')
 cursor.execute('CREATE INDEX IF NOT EXISTS idx_bid ON characters(bid)')
 
-html_dir = Path("/home/alvaro/Downloads/scrap/scrap14/scrap")
+html_dir = Path("$BASE_PATH/Downloads/scrap/scrap14/scrap")
 
 html_files = list(html_dir.glob("*.html"))
 print(f"Found {len(html_files)} HTML files to process")
