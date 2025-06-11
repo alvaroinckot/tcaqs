@@ -1,0 +1,6 @@
+title: "Tibia Character Automated Quotation System"
+description: "ML-powered Tibia character auction price prediction using XGBoost"
+version: "1.0.0"
+license: "MIT"
+author: "alvaroinckot"
+tags: ["machine-learning", "gaming", "tibia", "price-prediction"]

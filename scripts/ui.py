@@ -15,14 +15,15 @@ import json
 # Add parent directory to path to enable imports
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Model path - use absolute path to avoid path issues
-MODEL_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'models', 'xgboost_character_bid_model_v3.pkl')
+# Model path - use paths relative to script location for deployment
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+MODEL_PATH = os.path.join(BASE_DIR, 'models', 'xgboost_character_bid_model_v3.pkl')
 
 # Load server information from servers.json
 def load_server_info():
     """Load server information from servers.json file."""
     try:
-        servers_path = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'servers.json')
+        servers_path = os.path.join(BASE_DIR, 'data', 'servers.json')
         with open(servers_path, 'r') as f:
             servers_data = json.load(f)
         
@@ -46,12 +47,34 @@ SERVER_INFO = load_server_info()
 # Load the model and preprocessor
 def load_model(model_path=MODEL_PATH):
     try:
-        with open(model_path, 'rb') as f:
-            model_data = pickle.load(f)
-            model = model_data['model']
-            preprocessor = model_data['preprocessor']
-        print("Model loaded successfully.")
-        return model, preprocessor
+        # First try the provided path
+        if os.path.exists(model_path):
+            with open(model_path, 'rb') as f:
+                model_data = pickle.load(f)
+                model = model_data['model']
+                preprocessor = model_data['preprocessor']
+                print("Model loaded successfully.")
+                return model, preprocessor
+        else:
+            # Try alternative paths for deployment
+            alternative_paths = [
+                os.path.join(os.getcwd(), 'models', 'xgboost_character_bid_model_v3.pkl'),
+                os.path.join(os.path.dirname(__file__), '..', 'models', 'xgboost_character_bid_model_v3.pkl'),
+                'xgboost_character_bid_model_v3.pkl',  # Current directory
+            ]
+            
+            for alt_path in alternative_paths:
+                if os.path.exists(alt_path):
+                    print(f"Loading model from alternative path: {alt_path}")
+                    with open(alt_path, 'rb') as f:
+                        model_data = pickle.load(f)
+                        model = model_data['model']
+                        preprocessor = model_data['preprocessor']
+                        print("Model loaded successfully from alternative path.")
+                        return model, preprocessor
+            
+            raise FileNotFoundError(f"Model file not found at {model_path} or alternative paths")
+            
     except Exception as e:
         print(f"Error loading model: {e}")
         return None, None
@@ -62,7 +85,8 @@ VOCATIONS = ['knight', 'paladin', 'sorcerer', 'druid']
 # Function to get actual server names from the database
 def get_actual_servers():
     try:
-        conn = sqlite3.connect(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'data', 'characters.db'))
+        db_path = os.path.join(BASE_DIR, 'data', 'characters.db')
+        conn = sqlite3.connect(db_path)
         cursor = conn.cursor()
         cursor.execute('SELECT DISTINCT server FROM characters ORDER BY server')
         servers = [row[0] for row in cursor.fetchall()]
@@ -477,6 +501,7 @@ def launch_app():
     """Import Gradio and launch the app."""
     try:
         import gradio as gr
+        print(f"Gradio version: {gr.__version__}")
         
         # Create a comprehensive interface with all parameters organized in tabs
         with gr.Blocks(title="Tibia Character Automated Quotation System") as iface:
@@ -732,11 +757,13 @@ def launch_app():
             *Predictions are estimates based on historical data and may not reflect current market conditions.*
             """)
         
-        # Launch the interface
+        # Launch the interface with deployment-friendly settings
         iface.launch(
-            share=True,  # Create a public link
+            share=False,  # Don't create public link automatically
             server_name="0.0.0.0",  # Make it accessible from any IP
-            server_port=7862  # Use different port
+            server_port=7860,  # Use standard Gradio port
+            show_error=True,  # Show errors for debugging
+            quiet=False  # Show startup logs
         )
         
     except Exception as e:
