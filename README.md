@@ -91,31 +91,6 @@ Our XGBoost model demonstrates excellent performance across multiple metrics:
 - **Detailed Explanations**: Comprehensive result breakdowns
 - **Example Characters**: Pre-loaded test cases
 
-## 📁 Project Structure
-
-```
-tcaqs/
-├── 📱 app.py                 # Main deployment entry point
-├── 📋 requirements.txt       # Production dependencies
-├── 📊 models/               # Trained ML models
-│   └── xgboost_character_bid_model_v3.pkl
-├── 🗄️ data/                # Datasets and configurations
-│   ├── characters.db        # SQLite character database
-│   ├── servers.json         # Server metadata
-│   └── characters_processed.csv
-├── 📓 notebooks/            # Jupyter analysis notebooks
-│   ├── model.ipynb         # Model training and evaluation
-│   ├── analysis.ipynb      # Data exploration
-│   └── extract.ipynb       # Data processing
-├── 🛠️ scripts/             # Core application logic
-│   ├── ui.py               # Gradio web interface
-│   ├── extract_v3.py       # Latest data extraction
-│   └── character_predictor.py
-└── 📈 assets/              # Visualizations and results
-    ├── results-v3.png      # Model performance charts
-    ├── top-features.png    # Feature importance
-    └── bids-distribution.png
-```
 
 ## 🔧 Installation & Setup
 
@@ -149,39 +124,6 @@ tcaqs/
 ### **Alternative: Direct Deployment**
 ```bash
 gradio deploy  # Deploy to Gradio Spaces
-```
-
-## 🎯 Usage Examples
-
-### **Web Interface**
-1. Navigate to the running application
-2. Fill in character details across organized tabs:
-   - 🏆 Basic Info (level, vocation, server)
-   - ⚔️ Combat Skills (all fighting skills)
-   - 💎 Character Assets (mounts, outfits, gold)
-   - ✨ Advanced Features (charms, imbuements, quests)
-3. Click "🔮 Predict Character Value"
-4. View detailed prediction and explanation
-
-### **Programmatic Usage**
-```python
-from scripts.ui import load_model, predict_character_bid
-
-# Load the trained model
-model, preprocessor = load_model()
-
-# Prepare character data
-character_data = {
-    'level': 300,
-    'vocation': 'knight',
-    'server': 'Antica',
-    'axe_fighting': 100,
-    # ... other features
-}
-
-# Get prediction
-predicted_price = predict_character_bid(character_data, model, preprocessor)
-print(f"Predicted auction price: {predicted_price:,.0f} TC")
 ```
 
 ## 📈 Data Science Methodology
@@ -230,20 +172,6 @@ print(f"Predicted auction price: {predicted_price:,.0f} TC")
 ### **Local Development**
 ```bash
 python app.py  # Starts local server on port 7860
-```
-
-### **Production Deployment**
-```bash
-gradio deploy  # Deploys to Gradio Spaces cloud platform
-```
-
-### **Docker Support** (Future Enhancement)
-```dockerfile
-FROM python:3.9-slim
-COPY . /app
-WORKDIR /app
-RUN pip install -r requirements.txt
-CMD ["python", "app.py"]
 ```
 
 ## 📋 Development Roadmap
