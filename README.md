@@ -14,6 +14,7 @@ TCAQS is an end-to-end machine learning solution designed to solve a real-world 
 **Key Achievements:**
 - 🎯 **93.49% R² accuracy** on test data
 - 🔍 **400+ engineered features** from character profiles
+- 📊 **650,000+ character dataset** from 2022 auction data
 - 🚀 **Production-ready web application** with Gradio
 - 📊 **Comprehensive data pipeline** from scraping to deployment
 
@@ -180,9 +181,9 @@ print(f"Predicted auction price: {predicted_price:,.0f} TC")
 ## 📈 Data Science Methodology
 
 ### **1. Data Collection**
-- **Web Scraping**: Automated extraction from Tibia auction pages
-- **Data Volume**: 10,000+ character profiles
-- **Time Period**: Multi-year historical data
+- **Web Scraping**: Automated extraction from Tibia auction pages (2022)
+- **Data Volume**: ~650,000 character profiles
+- **Time Period**: Historical auction data from 2022
 - **Quality Assurance**: Automated validation and cleaning
 
 ### **2. Feature Engineering**
@@ -254,6 +255,14 @@ CMD ["python", "app.py"]
 - [ ] API endpoint development
 
 ### **📅 Future Enhancements**
+- [ ] Update dataset with post-2022 auction data
+- [ ] Expand training data beyond 650k characters
+- [ ] Integrate new Tibia features released after 2022:
+  - [ ] New mounts and outfits from recent updates
+  - [ ] Updated charm system changes
+  - [ ] New quest lines and bosses
+  - [ ] Bosstiary tracking system
+  - [ ] Updated imbuement system
 - [ ] Deep learning model comparison
 - [ ] Multi-server price analysis
 - [ ] Historical trend predictions
@@ -277,6 +286,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 🙏 Acknowledgments
 
+- **Exevo Pan Project**: Special thanks to the [Exevo Pan](https://exevopan.com) team for their invaluable contribution to the Tibia community and inspiration for character auction analysis
 - **Tibia Community**: For the rich gaming ecosystem that inspired this project
 - **CipSoft**: For creating the Tibia MMORPG
 - **Open Source Libraries**: XGBoost, Gradio, scikit-learn, and pandas teams
